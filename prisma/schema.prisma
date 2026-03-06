@@ -18,9 +18,24 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  requests CredentialRequest[]
+  requests      CredentialRequest[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  @@index([token])
+  @@index([userId])
+  @@map("refresh_tokens")
 }
 
 model CredentialRequest {
@@ -42,9 +57,10 @@ model CredentialRequest {
   submittedAt DateTime? @map("submitted_at")
   retrievedAt DateTime? @map("retrieved_at")
   revokedAt   DateTime? @map("revoked_at")
-  submitterIp String?   @map("submitter_ip")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  templateSlug String?   @map("template_slug")
+  submitterIp  String?   @map("submitter_ip")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   fields           CredentialField[]
   oauthConnections OAuthConnection[]
@@ -99,29 +115,6 @@ model OAuthConnection {
 
   @@index([requestId])
   @@map("oauth_connections")
-}
-
-model ServiceTemplate {
-  id               String   @id @default(uuid())
-  slug             String   @unique
-  name             String
-  icon             String?
-  category         String
-  authMethod       String   @default("MANUAL") @map("auth_method")
-  oauthProvider    String?  @map("oauth_provider")
-  oauthScopes      String?  @map("oauth_scopes")
-  fields           String
-  guide            String?
-  validationRules  String?  @map("validation_rules")
-  stuckCount       Int      @default(0) @map("stuck_count")
-  successCount     Int      @default(0) @map("success_count")
-  avgCompletionSec Float?   @map("avg_completion_sec")
-  isBuiltIn        Boolean  @default(true) @map("is_built_in")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  @@index([category])
-  @@map("service_templates")
 }
 
 model AuditLog {

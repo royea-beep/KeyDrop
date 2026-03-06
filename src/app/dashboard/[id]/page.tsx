@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { ArrowLeft, Copy, Check, Eye, EyeOff, Download, Shield, Clock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Eye, EyeOff, Download, Shield, Clock, Loader2, Ban, Trash2, ClipboardList } from 'lucide-react';
 
 interface DecryptedField {
   id: string;
@@ -59,6 +59,28 @@ export default function RequestDetailPage({ params }: { params: Promise<{ id: st
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const copyAll = () => {
+    const lines = fields.map((f) => `${f.label}: ${f.value}`);
+    for (const o of oauth) {
+      lines.push(`${o.providerLabel}: ${o.token}`);
+    }
+    navigator.clipboard.writeText(lines.join('\n'));
+    setCopiedId('__all__');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const deleteRequest = async () => {
+    if (!confirm('Delete this request? All encrypted data will be permanently removed.')) return;
+    const res = await authFetch(`/api/requests/${id}`, { method: 'DELETE' });
+    if (res.ok) router.push('/dashboard');
+  };
+
+  const revokeRequest = async () => {
+    if (!confirm('Revoke this request?')) return;
+    await authFetch(`/api/requests/${id}/revoke`, { method: 'POST' });
+    router.push('/dashboard');
+  };
+
   const exportEnv = () => {
     const lines = fields.map((f) => {
       const key = f.label.toUpperCase().replace(/[^A-Z0-9]/g, '_');
@@ -104,13 +126,38 @@ export default function RequestDetailPage({ params }: { params: Promise<{ id: st
 
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Credentials</h1>
-        <button
-          onClick={exportEnv}
-          className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          Export .env
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={copyAll}
+            className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+              copiedId === '__all__' ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            {copiedId === '__all__' ? <Check className="w-4 h-4" /> : <ClipboardList className="w-4 h-4" />}
+            {copiedId === '__all__' ? 'Copied!' : 'Copy All'}
+          </button>
+          <button
+            onClick={exportEnv}
+            className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export .env
+          </button>
+          <button
+            onClick={revokeRequest}
+            className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:text-amber-700 px-3 py-2 rounded-lg hover:bg-amber-50 transition-colors"
+            title="Revoke link"
+          >
+            <Ban className="w-4 h-4" />
+          </button>
+          <button
+            onClick={deleteRequest}
+            className="flex items-center gap-1.5 text-sm font-medium text-red-500 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+            title="Delete"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 text-xs text-gray-400 mb-4">

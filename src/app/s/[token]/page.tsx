@@ -246,21 +246,22 @@ export default function SubmissionPage({ params }: { params: Promise<{ token: st
           </div>
         </div>
 
-        {/* OAuth Connect Buttons */}
+        {/* OAuth Connect Buttons — Coming Soon */}
         {data.oauthConnections.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
             <div className="space-y-3">
               {data.oauthConnections.map((conn) => (
-                <button
-                  key={conn.id}
-                  className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors"
-                  onClick={() => {
-                    // OAuth flow will be implemented with provider-specific redirect
-                    window.location.href = `/api/oauth/${conn.provider}/start?connection=${conn.id}&token=${token}`;
-                  }}
-                >
-                  {strings.connectWith} {conn.providerLabel}
-                </button>
+                <div key={conn.id} className="relative group">
+                  <button
+                    disabled
+                    className="w-full flex items-center justify-center gap-3 bg-gray-300 text-gray-500 font-medium py-3 px-4 rounded-xl cursor-not-allowed"
+                  >
+                    {strings.connectWith} {conn.providerLabel}
+                  </button>
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    {lang === 'he' ? 'בקרוב' : 'Coming Soon'}
+                  </span>
+                </div>
               ))}
             </div>
 

@@ -1,8 +1,21 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-me';
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required but not set');
+  }
+  return secret;
+}
+
+function getJwtRefreshSecret(): string {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    throw new Error('JWT_REFRESH_SECRET environment variable is required but not set');
+  }
+  return secret;
+}
 
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
@@ -21,19 +34,19 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function signAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: ACCESS_TOKEN_EXPIRY });
 }
 
 export function signRefreshToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+  return jwt.sign(payload, getJwtRefreshSecret(), { expiresIn: REFRESH_TOKEN_EXPIRY });
 }
 
 export function verifyAccessToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, getJwtSecret()) as TokenPayload;
 }
 
 export function verifyRefreshToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_REFRESH_SECRET) as TokenPayload;
+  return jwt.verify(token, getJwtRefreshSecret()) as TokenPayload;
 }
 
 export function extractBearerToken(authHeader: string | null): string | null {

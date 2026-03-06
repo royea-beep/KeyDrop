@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { Copy, Check, ExternalLink, Trash2, Eye, Clock, ChevronRight, Inbox, Plus } from 'lucide-react';
+import { Copy, Check, ExternalLink, Trash2, Eye, Clock, ChevronRight, Inbox, Plus, Search, Ban } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface RequestField {
   id: string;
@@ -76,6 +77,8 @@ export default function DashboardPage() {
   const { authFetch } = useAuth();
   const [requests, setRequests] = useState<CredentialRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const fetchRequests = async () => {
     try {
@@ -91,11 +94,42 @@ export default function DashboardPage() {
 
   const deleteRequest = async (id: string) => {
     if (!confirm('Delete this request? All encrypted data will be permanently removed.')) return;
-    const res = await authFetch(`/api/requests/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setRequests((prev) => prev.filter((r) => r.id !== id));
+    try {
+      const res = await authFetch(`/api/requests/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setRequests((prev) => prev.filter((r) => r.id !== id));
+        toast.success('Request deleted');
+      } else {
+        toast.error('Failed to delete request');
+      }
+    } catch {
+      toast.error('Failed to delete request');
     }
   };
+
+  const revokeRequest = async (id: string) => {
+    if (!confirm('Revoke this request? The client will no longer be able to submit credentials.')) return;
+    try {
+      const res = await authFetch(`/api/requests/${id}/revoke`, { method: 'POST' });
+      if (res.ok) {
+        setRequests((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REVOKED' } : r));
+        toast.success('Request revoked');
+      } else {
+        toast.error('Failed to revoke request');
+      }
+    } catch {
+      toast.error('Failed to revoke request');
+    }
+  };
+
+  const filtered = requests.filter((r) => {
+    if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return r.title.toLowerCase().includes(q) || r.clientName.toLowerCase().includes(q) || (r.projectName || '').toLowerCase().includes(q);
+    }
+    return true;
+  });
 
   if (loading) {
     return (
@@ -122,9 +156,9 @@ export default function DashboardPage() {
     );
   }
 
-  const active = requests.filter((r) => ['PENDING', 'VIEWED'].includes(r.status));
-  const completed = requests.filter((r) => ['SUBMITTED', 'RETRIEVED'].includes(r.status));
-  const inactive = requests.filter((r) => ['EXPIRED', 'REVOKED'].includes(r.status));
+  const active = filtered.filter((r) => ['PENDING', 'VIEWED'].includes(r.status));
+  const completed = filtered.filter((r) => ['SUBMITTED', 'RETRIEVED'].includes(r.status));
+  const inactive = filtered.filter((r) => ['EXPIRED', 'REVOKED'].includes(r.status));
 
   const renderCard = (req: CredentialRequest) => {
     const status = STATUS_CONFIG[req.status] || STATUS_CONFIG.PENDING;
@@ -185,6 +219,15 @@ export default function DashboardPage() {
             </a>
           )}
           <div className="flex-1" />
+          {(req.status === 'PENDING' || req.status === 'VIEWED') && (
+            <button
+              onClick={() => revokeRequest(req.id)}
+              className="text-gray-300 hover:text-amber-500 p-1 rounded hover:bg-amber-50 transition-colors"
+              title="Revoke"
+            >
+              <Ban className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             onClick={() => deleteRequest(req.id)}
             className="text-gray-300 hover:text-red-500 p-1 rounded hover:bg-red-50 transition-colors"
@@ -199,6 +242,40 @@ export default function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, client, or project..."
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+        >
+          <option value="all">All statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="VIEWED">Viewed</option>
+          <option value="SUBMITTED">Submitted</option>
+          <option value="RETRIEVED">Retrieved</option>
+          <option value="EXPIRED">Expired</option>
+          <option value="REVOKED">Revoked</option>
+        </select>
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12 text-gray-400">
+          <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-sm">No requests match your search.</p>
+        </div>
+      )}
+
       {active.length > 0 && (
         <section className="mb-8">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">

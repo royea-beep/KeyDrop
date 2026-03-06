@@ -25,6 +25,14 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
     return NextResponse.json({ error: 'Credentials not yet submitted' }, { status: 400 });
   }
 
+  // Enforce maxViews limit
+  if (request.viewCount >= request.maxViews) {
+    return NextResponse.json(
+      { error: 'Maximum view count exceeded. These credentials are no longer accessible.' },
+      { status: 403 }
+    );
+  }
+
   // Decrypt manual fields
   const decryptedFields = request.fields
     .filter((f: CredentialField) => f.encryptedValue && f.iv && f.authTag)
@@ -47,13 +55,15 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
       tokenType: o.tokenType,
     }));
 
-  // Mark as retrieved
-  if (request.status !== 'RETRIEVED') {
-    await prisma.credentialRequest.update({
-      where: { id },
-      data: { status: 'RETRIEVED', retrievedAt: new Date() },
-    });
-  }
+  // Mark as retrieved and increment view count
+  await prisma.credentialRequest.update({
+    where: { id },
+    data: {
+      status: 'RETRIEVED',
+      retrievedAt: new Date(),
+      viewCount: { increment: 1 },
+    },
+  });
 
   await prisma.auditLog.create({
     data: {

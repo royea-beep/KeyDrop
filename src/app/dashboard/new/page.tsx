@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { BUILT_IN_TEMPLATES, type ServiceTemplate } from '@/lib/templates';
 import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, Copy, Check, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface FieldDef {
   id: string;
@@ -22,11 +23,10 @@ interface OAuthDef {
   scopes?: string;
 }
 
-let fieldCounter = 0;
-
 export default function NewRequestPage() {
   const router = useRouter();
   const { authFetch } = useAuth();
+  const fieldCounterRef = useState(() => ({ current: 0 }))[0];
 
   // Form state
   const [title, setTitle] = useState('');
@@ -40,6 +40,8 @@ export default function NewRequestPage() {
   const [fields, setFields] = useState<FieldDef[]>([]);
   const [oauthProviders, setOauthProviders] = useState<OAuthDef[]>([]);
 
+  const [templateSlug, setTemplateSlug] = useState<string | undefined>(undefined);
+
   // UI state
   const [showTemplates, setShowTemplates] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -48,9 +50,10 @@ export default function NewRequestPage() {
   const [copied, setCopied] = useState(false);
 
   const applyTemplate = (template: ServiceTemplate) => {
+    setTemplateSlug(template.slug);
     setTitle(`${template.name} API keys`);
     setFields(template.fields.map((f, i) => ({
-      id: `field_${++fieldCounter}`,
+      id: `field_${++fieldCounterRef.current}`,
       label: f.label,
       fieldType: f.fieldType,
       required: f.required,
@@ -72,7 +75,7 @@ export default function NewRequestPage() {
 
   const addField = () => {
     setFields([...fields, {
-      id: `field_${++fieldCounter}`,
+      id: `field_${++fieldCounterRef.current}`,
       label: '',
       fieldType: 'TEXT',
       required: true,
@@ -113,6 +116,7 @@ export default function NewRequestPage() {
           note: note || undefined,
           language,
           expiresInHours,
+          templateSlug,
           fields: fields.map((f) => ({
             label: f.label,
             fieldType: f.fieldType,
@@ -132,8 +136,11 @@ export default function NewRequestPage() {
 
       const data = await res.json();
       setResult({ link: data.link });
+      toast.success('Request created! Link is ready to share.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create request');
+      const msg = err instanceof Error ? err.message : 'Failed to create request';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

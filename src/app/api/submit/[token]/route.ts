@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { encrypt } from '@/lib/crypto';
 import { submitCredentialsSchema } from '@/lib/validation';
+import { submitLimiter, applyRateLimit } from '@/lib/rate-limit';
 
 // POST /api/submit/[token] — client submits credentials (public, no auth)
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await applyRateLimit(submitLimiter, req);
+  if (rateLimitResponse) return rateLimitResponse;
   const token = req.nextUrl.pathname.split('/').pop()!;
 
   const request = await prisma.credentialRequest.findUnique({

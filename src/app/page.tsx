@@ -49,7 +49,7 @@ export default function LandingPage() {
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-3 gap-6 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-left">
             <div className="bg-white rounded-xl p-4 border border-gray-100">
               <Lock className="w-5 h-5 text-blue-600 mb-2" />
               <h3 className="font-semibold text-gray-900 text-sm mb-1">AES-256 Encrypted</h3>

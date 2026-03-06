@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 
 interface User {
   id: string;
@@ -21,28 +21,118 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+// Parse JWT expiry without a library
+function getTokenExpiry(token: string): number | null {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp ? payload.exp * 1000 : null; // convert to ms
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRefreshingRef = useRef(false);
+
+  const clearAuth = useCallback(() => {
+    setUser(null);
+    setToken(null);
+    setRefreshToken(null);
+    localStorage.removeItem('12clicks_auth');
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleRefresh = useCallback((accessToken: string, currentRefreshToken: string) => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+
+    const expiry = getTokenExpiry(accessToken);
+    if (!expiry) return;
+
+    // Refresh 60 seconds before expiry
+    const refreshIn = Math.max(expiry - Date.now() - 60_000, 5_000);
+
+    refreshTimerRef.current = setTimeout(async () => {
+      if (isRefreshingRef.current) return;
+      isRefreshingRef.current = true;
+
+      try {
+        const res = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: currentRefreshToken }),
+        });
+
+        if (!res.ok) {
+          clearAuth();
+          return;
+        }
+
+        const data = await res.json();
+        setToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+
+        // Persist to localStorage — preserve the user object
+        const saved = localStorage.getItem('12clicks_auth');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            localStorage.setItem('12clicks_auth', JSON.stringify({
+              user: parsed.user,
+              token: data.accessToken,
+              refreshToken: data.refreshToken,
+            }));
+          } catch { /* ignore */ }
+        }
+
+        // Schedule next refresh
+        scheduleRefresh(data.accessToken, data.refreshToken);
+      } catch {
+        clearAuth();
+      } finally {
+        isRefreshingRef.current = false;
+      }
+    }, refreshIn);
+  }, [clearAuth]);
+
+  const saveAuth = useCallback((u: User, accessToken: string, rt: string) => {
+    setUser(u);
+    setToken(accessToken);
+    setRefreshToken(rt);
+    localStorage.setItem('12clicks_auth', JSON.stringify({ user: u, token: accessToken, refreshToken: rt }));
+    scheduleRefresh(accessToken, rt);
+  }, [scheduleRefresh]);
 
   useEffect(() => {
     const saved = localStorage.getItem('12clicks_auth');
     if (saved) {
       try {
-        const { user: u, token: t } = JSON.parse(saved);
+        const { user: u, token: t, refreshToken: rt } = JSON.parse(saved);
         setUser(u);
         setToken(t);
+        setRefreshToken(rt);
+        if (t && rt) {
+          scheduleRefresh(t, rt);
+        }
       } catch { /* ignore */ }
     }
     setLoading(false);
-  }, []);
 
-  const saveAuth = (u: User, t: string) => {
-    setUser(u);
-    setToken(t);
-    localStorage.setItem('12clicks_auth', JSON.stringify({ user: u, token: t }));
-  };
+    return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, [scheduleRefresh]);
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/auth/login', {
@@ -55,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || 'Login failed');
     }
     const data = await res.json();
-    saveAuth(data.user, data.accessToken);
+    saveAuth(data.user, data.accessToken, data.refreshToken);
   };
 
   const register = async (email: string, password: string, name: string, businessName?: string) => {
@@ -69,17 +159,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error || 'Registration failed');
     }
     const data = await res.json();
-    saveAuth(data.user, data.accessToken);
+    saveAuth(data.user, data.accessToken, data.refreshToken);
   };
 
   const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('12clicks_auth');
+    clearAuth();
   };
 
   const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
-    return fetch(url, {
+    const res = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
@@ -87,7 +175,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         'Content-Type': 'application/json',
       },
     });
-  }, [token]);
+
+    // If we get a 401, try refreshing the token once
+    if (res.status === 401 && refreshToken && !isRefreshingRef.current) {
+      isRefreshingRef.current = true;
+      try {
+        const refreshRes = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          setToken(data.accessToken);
+          setRefreshToken(data.refreshToken);
+
+          // Update localStorage
+          const saved = localStorage.getItem('12clicks_auth');
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              localStorage.setItem('12clicks_auth', JSON.stringify({
+                user: parsed.user,
+                token: data.accessToken,
+                refreshToken: data.refreshToken,
+              }));
+            } catch { /* ignore */ }
+          }
+
+          scheduleRefresh(data.accessToken, data.refreshToken);
+
+          // Retry the original request with the new token
+          return fetch(url, {
+            ...options,
+            headers: {
+              ...options.headers,
+              'Authorization': `Bearer ${data.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+        } else {
+          clearAuth();
+        }
+      } catch {
+        clearAuth();
+      } finally {
+        isRefreshingRef.current = false;
+      }
+    }
+
+    return res;
+  }, [token, refreshToken, clearAuth, scheduleRefresh]);
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, register, logout, authFetch }}>

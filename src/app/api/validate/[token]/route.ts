@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { validateLimiter, applyRateLimit } from '@/lib/rate-limit';
 
 // GET /api/validate/[token] — check if a link is valid (public, no auth)
 export async function GET(req: NextRequest) {
+  const rateLimitResponse = await applyRateLimit(validateLimiter, req);
+  if (rateLimitResponse) return rateLimitResponse;
   const token = req.nextUrl.pathname.split('/').pop()!;
 
   const request = await prisma.credentialRequest.findUnique({

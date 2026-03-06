@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hashPassword, signAccessToken, signRefreshToken } from '@/lib/auth';
 import { registerSchema } from '@/lib/validation';
+import { registerLimiter, applyRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  const rateLimitResponse = await applyRateLimit(registerLimiter, req);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await req.json();
     const data = registerSchema.parse(body);
@@ -26,6 +30,24 @@ export async function POST(req: NextRequest) {
     const payload = { userId: user.id, email: user.email };
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
+
+    // Store refresh token in database
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'register',
+        ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        userAgent: req.headers.get('user-agent'),
+      },
+    });
 
     return NextResponse.json({
       user: { id: user.id, email: user.email, name: user.name },

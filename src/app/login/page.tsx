@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Shield, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,7 +22,9 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      const msg = err instanceof Error ? err.message : 'Login failed';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
