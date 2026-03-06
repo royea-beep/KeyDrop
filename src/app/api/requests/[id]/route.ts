@@ -38,7 +38,7 @@ export const DELETE = withAuth(async (_req: NextRequest, userId: string) => {
   await prisma.credentialRequest.delete({ where: { id } });
 
   await prisma.auditLog.create({
-    data: { userId, action: 'request_deleted', metadata: { requestTitle: request.title } },
+    data: { userId, action: 'request_deleted', metadata: JSON.stringify({ requestTitle: request.title }) },
   });
 
   return NextResponse.json({ success: true });

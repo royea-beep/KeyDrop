@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model User {
@@ -24,27 +24,27 @@ model User {
 }
 
 model CredentialRequest {
-  id          String        @id @default(uuid())
-  userId      String        @map("user_id")
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
-  clientName  String        @map("client_name")
-  clientEmail String?       @map("client_email")
-  clientPhone String?       @map("client_phone")
-  projectName String?       @map("project_name")
+  clientName  String    @map("client_name")
+  clientEmail String?   @map("client_email")
+  clientPhone String?   @map("client_phone")
+  projectName String?   @map("project_name")
   note        String?
-  language    String        @default("en")
-  token       String        @unique
-  status      RequestStatus @default(PENDING)
-  expiresAt   DateTime      @map("expires_at")
-  maxViews    Int           @default(1) @map("max_views")
-  viewCount   Int           @default(0) @map("view_count")
-  submittedAt DateTime?     @map("submitted_at")
-  retrievedAt DateTime?     @map("retrieved_at")
-  revokedAt   DateTime?     @map("revoked_at")
-  submitterIp String?       @map("submitter_ip")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  language    String    @default("en")
+  token       String    @unique
+  status      String    @default("PENDING")
+  expiresAt   DateTime  @map("expires_at")
+  maxViews    Int       @default(1) @map("max_views")
+  viewCount   Int       @default(0) @map("view_count")
+  submittedAt DateTime? @map("submitted_at")
+  retrievedAt DateTime? @map("retrieved_at")
+  revokedAt   DateTime? @map("revoked_at")
+  submitterIp String?   @map("submitter_ip")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   fields           CredentialField[]
   oauthConnections OAuthConnection[]
@@ -61,7 +61,7 @@ model CredentialField {
   requestId         String    @map("request_id")
   request           CredentialRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   label             String
-  fieldType         FieldType @default(TEXT) @map("field_type")
+  fieldType         String    @default("TEXT") @map("field_type")
   required          Boolean   @default(true)
   sortOrder         Int       @default(0) @map("sort_order")
   placeholder       String?
@@ -77,48 +77,48 @@ model CredentialField {
 }
 
 model OAuthConnection {
-  id               String      @id @default(uuid())
-  requestId        String      @map("request_id")
+  id               String    @id @default(uuid())
+  requestId        String    @map("request_id")
   request          CredentialRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   provider         String
-  providerLabel    String      @map("provider_label")
+  providerLabel    String    @map("provider_label")
   scopes           String?
-  encryptedToken   String?     @map("encrypted_token")
+  encryptedToken   String?   @map("encrypted_token")
   iv               String?
-  authTag          String?     @map("auth_tag")
-  tokenType        String?     @map("token_type")
-  expiresAt        DateTime?   @map("expires_at")
-  refreshEncrypted String?     @map("refresh_encrypted")
-  refreshIv        String?     @map("refresh_iv")
-  refreshAuthTag   String?     @map("refresh_auth_tag")
-  connectedAt      DateTime?   @map("connected_at")
-  accountName      String?     @map("account_name")
-  accountId        String?     @map("account_id")
-  status           OAuthStatus @default(PENDING)
-  createdAt        DateTime    @default(now()) @map("created_at")
+  authTag          String?   @map("auth_tag")
+  tokenType        String?   @map("token_type")
+  expiresAt        DateTime? @map("expires_at")
+  refreshEncrypted String?   @map("refresh_encrypted")
+  refreshIv        String?   @map("refresh_iv")
+  refreshAuthTag   String?   @map("refresh_auth_tag")
+  connectedAt      DateTime? @map("connected_at")
+  accountName      String?   @map("account_name")
+  accountId        String?   @map("account_id")
+  status           String    @default("PENDING")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
   @@index([requestId])
   @@map("oauth_connections")
 }
 
 model ServiceTemplate {
-  id               String     @id @default(uuid())
-  slug             String     @unique
+  id               String   @id @default(uuid())
+  slug             String   @unique
   name             String
   icon             String?
   category         String
-  authMethod       AuthMethod @default(MANUAL) @map("auth_method")
-  oauthProvider    String?    @map("oauth_provider")
-  oauthScopes      String?    @map("oauth_scopes")
-  fields           Json
-  guide            Json?
-  validationRules  Json?      @map("validation_rules")
-  stuckCount       Int        @default(0) @map("stuck_count")
-  successCount     Int        @default(0) @map("success_count")
-  avgCompletionSec Float?     @map("avg_completion_sec")
-  isBuiltIn        Boolean    @default(true) @map("is_built_in")
-  createdAt        DateTime   @default(now()) @map("created_at")
-  updatedAt        DateTime   @updatedAt @map("updated_at")
+  authMethod       String   @default("MANUAL") @map("auth_method")
+  oauthProvider    String?  @map("oauth_provider")
+  oauthScopes      String?  @map("oauth_scopes")
+  fields           String
+  guide            String?
+  validationRules  String?  @map("validation_rules")
+  stuckCount       Int      @default(0) @map("stuck_count")
+  successCount     Int      @default(0) @map("success_count")
+  avgCompletionSec Float?   @map("avg_completion_sec")
+  isBuiltIn        Boolean  @default(true) @map("is_built_in")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   @@index([category])
   @@map("service_templates")
@@ -132,38 +132,10 @@ model AuditLog {
   action    String
   ipAddress String?            @map("ip_address")
   userAgent String?            @map("user_agent")
-  metadata  Json?
+  metadata  String?
   createdAt DateTime           @default(now()) @map("created_at")
 
   @@index([requestId])
   @@index([userId])
   @@map("audit_logs")
-}
-
-enum RequestStatus {
-  PENDING
-  VIEWED
-  SUBMITTED
-  RETRIEVED
-  EXPIRED
-  REVOKED
-}
-
-enum FieldType {
-  TEXT
-  SECRET
-  URL
-}
-
-enum OAuthStatus {
-  PENDING
-  CONNECTED
-  FAILED
-  EXPIRED
-}
-
-enum AuthMethod {
-  OAUTH
-  MANUAL
-  BOTH
 }

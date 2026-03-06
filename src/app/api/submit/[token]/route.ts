@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
         action: 'creds_submitted',
         ipAddress: clientIp,
         userAgent: req.headers.get('user-agent'),
-        metadata: { fieldCount: Object.keys(data.fields).length },
+        metadata: JSON.stringify({ fieldCount: Object.keys(data.fields).length }),
       },
     });
 
