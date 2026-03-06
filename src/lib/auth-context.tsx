@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('keydrop_auth');
+    const saved = localStorage.getItem('12clicks_auth');
     if (saved) {
       try {
         const { user: u, token: t } = JSON.parse(saved);
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const saveAuth = (u: User, t: string) => {
     setUser(u);
     setToken(t);
-    localStorage.setItem('keydrop_auth', JSON.stringify({ user: u, token: t }));
+    localStorage.setItem('12clicks_auth', JSON.stringify({ user: u, token: t }));
   };
 
   const login = async (email: string, password: string) => {
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('keydrop_auth');
+    localStorage.removeItem('12clicks_auth');
   };
 
   const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {

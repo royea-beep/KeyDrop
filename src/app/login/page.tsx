@@ -34,7 +34,7 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
             <Shield className="w-6 h-6 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">KeyDrop</h1>
+          <h1 className="text-2xl font-bold text-gray-900">1-2Clicks</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
         </div>
 

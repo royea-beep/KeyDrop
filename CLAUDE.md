@@ -1,4 +1,4 @@
-# KeyDrop — Secure Credential Collector
+# 1-2Clicks — Secure Credential Collector
 
 ## Credits
 - Roy (Creator & Product Visionary)
@@ -8,9 +8,11 @@
 A web app where freelance developers collect API keys from clients securely.
 Developer creates a request, sends a link via WhatsApp/SMS, client submits credentials through a clean mobile-friendly form. Everything encrypted (AES-256-GCM).
 
+The name says it all — client gets a link, 1-2 clicks, done.
+
 ## Tech Stack
 - Next.js 14+ (App Router)
-- PostgreSQL via Prisma 7 (adapter-pg)
+- SQLite (dev) / PostgreSQL (prod) via Prisma 7
 - AES-256-GCM encryption (Node.js crypto)
 - JWT auth (bcryptjs + jsonwebtoken)
 - Tailwind CSS
@@ -20,11 +22,15 @@ Developer creates a request, sends a link via WhatsApp/SMS, client submits crede
 
 ## Architecture
 ```
-KeyDrop/
-├── prisma/schema.prisma          # DB schema
+1-2Clicks/
+├── prisma/schema.prisma          # DB schema (SQLite for dev)
 ├── prisma.config.ts              # Prisma 7 config
 ├── src/
 │   ├── app/
+│   │   ├── page.tsx              # Landing page
+│   │   ├── login/                # Developer login
+│   │   ├── register/             # Developer registration
+│   │   ├── dashboard/            # Request list, create, view credentials
 │   │   ├── api/auth/             # register, login
 │   │   ├── api/requests/         # CRUD + credentials retrieval + revoke
 │   │   ├── api/validate/[token]/ # Public: check link validity
@@ -34,9 +40,10 @@ KeyDrop/
 │   │   ├── crypto.ts             # AES-256-GCM encrypt/decrypt
 │   │   ├── auth.ts               # JWT + bcrypt
 │   │   ├── auth-guard.ts         # withAuth middleware wrapper
+│   │   ├── auth-context.tsx      # Client-side auth state
 │   │   ├── db.ts                 # Prisma client singleton
 │   │   ├── validation.ts         # Zod schemas
-│   │   ├── templates.ts          # Built-in service templates (Facebook, Google, Stripe, etc.)
+│   │   ├── templates.ts          # Built-in service templates
 │   │   └── constants.ts
 │   └── generated/prisma/         # Prisma generated client
 ```
@@ -68,15 +75,16 @@ KeyDrop/
 - Needs DATABASE_URL, ENCRYPTION_MASTER_KEY, JWT_SECRET in .env
 
 ## Current Status
-Phase 1 scaffolding complete:
-- All API routes built
-- Client submission form built (mobile-first, Hebrew/English)
-- 8 service templates (Facebook, Google, Instagram, Stripe, SendGrid, Cloudflare, TikTok, Mailchimp)
-- Prisma schema with all tables
-- Zero TypeScript errors
+Full E2E working:
+- Register, login, create request, copy link
+- Client opens link, submits credentials (encrypted)
+- Developer retrieves decrypted credentials (1 click copy, .env export)
+- Dashboard with status tracking
+- 8 service templates with Hebrew/English support
+- Zero TypeScript errors, clean build
 
 ## TODO
-- Dashboard UI (developer side)
 - OAuth provider flows (Facebook, Google)
 - AI-powered guide generation for unknown services
-- Deploy to Vercel + Neon
+- Deploy to Vercel + Neon (switch back to PostgreSQL)
+- Rename folder from KeyDrop to 1-2Clicks

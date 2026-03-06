@@ -9,7 +9,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "KeyDrop — Secure Credential Collector",
+  title: "1-2Clicks — Secure Credential Collector",
   description: "Collect API keys from clients securely",
 };
 
