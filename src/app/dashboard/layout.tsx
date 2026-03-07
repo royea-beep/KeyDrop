@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { Shield, LogOut, Plus, LayoutDashboard } from 'lucide-react';
+import { Shield, LogOut, Plus, LayoutDashboard, CreditCard } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
@@ -37,6 +37,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <a href="/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
+              </a>
+              <a href="/billing" className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                <CreditCard className="w-4 h-4" />
+                Billing
               </a>
             </nav>
           </div>

@@ -4,6 +4,7 @@ import { generateToken } from '@/lib/crypto';
 import { createRequestSchema } from '@/lib/validation';
 import { withAuth } from '@/lib/auth-guard';
 import { AUTO_PURGE_DAYS } from '@/lib/constants';
+import { getPlanLimits } from '@/lib/payments';
 
 // Probabilistic auto-purge: delete expired/completed requests older than AUTO_PURGE_DAYS
 // Runs ~10% of GET requests to avoid running every time
@@ -50,6 +51,30 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     const body = await req.json();
     const data = createRequestSchema.parse(body);
 
+    // Check plan limits
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user) {
+      const limits = getPlanLimits(user.plan);
+
+      // Reset monthly counter if billing cycle has passed
+      const cycleStart = new Date(user.billingCycleStart);
+      const now = new Date();
+      if (now.getTime() - cycleStart.getTime() > 30 * 24 * 60 * 60 * 1000) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { requestsThisMonth: 0, billingCycleStart: now },
+        });
+        user.requestsThisMonth = 0;
+      }
+
+      if (limits.requestsPerMonth > 0 && user.requestsThisMonth >= limits.requestsPerMonth) {
+        return NextResponse.json(
+          { error: 'Monthly request limit reached. Upgrade your plan for more.', code: 'LIMIT_REACHED' },
+          { status: 403 }
+        );
+      }
+    }
+
     const token = generateToken();
     const expiresAt = new Date(Date.now() + data.expiresInHours * 60 * 60 * 1000);
 
@@ -92,6 +117,12 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
 
     await prisma.auditLog.create({
       data: { requestId: request.id, userId, action: 'link_created' },
+    });
+
+    // Increment monthly usage counter
+    await prisma.user.update({
+      where: { id: userId },
+      data: { requestsThisMonth: { increment: 1 } },
     });
 
     return NextResponse.json({

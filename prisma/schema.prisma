@@ -15,6 +15,16 @@ model User {
   businessName String?  @map("business_name")
   logoUrl      String?  @map("logo_url")
   language     String   @default("en")
+
+  // Stripe billing
+  plan                String   @default("FREE")
+  stripeCustomerId    String?  @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @map("stripe_subscription_id")
+  subscriptionStatus  String   @default("INACTIVE") @map("subscription_status")
+  currentPeriodEnd    DateTime? @map("current_period_end")
+  requestsThisMonth   Int      @default(0) @map("requests_this_month")
+  billingCycleStart   DateTime @default(now()) @map("billing_cycle_start")
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
