@@ -175,12 +175,22 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Social proof placeholder */}
+        {/* Security trust signal */}
         <section className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Trusted by developers and agencies</h2>
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700">
-            <p className="text-gray-500 dark:text-gray-400 italic">“We used to chase API keys in Slack and email. KeyDrop cut that time to zero. One link, done.”</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-4">— Launching soon. Your quote here.</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">Built for security-conscious teams</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <p className="text-2xl font-bold text-blue-600">AES-256</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Military-grade encryption</p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <p className="text-2xl font-bold text-blue-600">One-time</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Links expire after use</p>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <p className="text-2xl font-bold text-blue-600">30+</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Pre-built service templates</p>
+            </div>
           </div>
         </section>
       </main>
@@ -197,6 +207,8 @@ export default function LandingPage() {
             <Link href="/register" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Register</Link>
             <Link href="/dashboard" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Dashboard</Link>
             <Link href="/billing" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Pricing</Link>
+            <Link href="/terms" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Terms</Link>
+            <Link href="/privacy" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Privacy</Link>
           </nav>
           <p className="text-xs text-gray-400 dark:text-gray-500">Built with care · Encrypted by default</p>
         </div>

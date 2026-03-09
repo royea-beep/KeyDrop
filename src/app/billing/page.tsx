@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@royea/shared-utils/auth-context';
 import { useRouter } from 'next/navigation';
 import { Shield, Check, Zap, Crown, ArrowLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,7 +34,7 @@ const PLANS = [
     name: 'Team',
     price: 49,
     icon: Crown,
-    features: ['Unlimited requests', '20 fields per request', 'All Pro features', 'Team members (soon)', 'API access (soon)'],
+    features: ['Unlimited requests', '20 fields per request', 'All Pro features', 'Priority support', 'Custom branding'],
   },
 ];
 
