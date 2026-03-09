@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@royea/flush-queue": "file:../FlushQueue",
-    "@royea/shared-utils": "file:../shared-utils",
+    "@royea/flush-queue": "file:./vendor/royea-flush-queue-1.0.0.tgz",
+    "@royea/shared-utils": "file:./vendor/royea-shared-utils-1.0.0.tgz",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@libsql/client": "^0.17.0",
     "@prisma/adapter-libsql": "^7.4.2",
