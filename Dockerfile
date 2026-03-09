@@ -9,7 +9,7 @@ COPY vendor/ ./vendor/
 RUN npm ci
 
 COPY . .
-RUN ls src/app/ && npx prisma generate && npm run build
+RUN npm run build
 
 ENV NODE_ENV=production
 ENV PORT=3000
