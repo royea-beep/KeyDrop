@@ -11,10 +11,8 @@ import crypto from 'crypto';
  * Docs: https://docs.lemonsqueezy.com/help/webhooks
  */
 export async function POST(req: NextRequest) {
-  console.log('[WEBHOOK] Received POST request');
   const rawBody = await req.text();
   const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-  console.log('[WEBHOOK] Body length:', rawBody.length, 'Secret set:', !!secret);
 
   if (!secret) {
     console.error('LEMONSQUEEZY_WEBHOOK_SECRET not set');
@@ -49,9 +47,7 @@ export async function POST(req: NextRequest) {
   const userId = customData?.user_id;
   const attrs = payload.data?.attributes;
 
-  console.log('[WEBHOOK] Event:', eventName, 'User ID:', userId, 'Has attrs:', !!attrs);
   if (!userId || !attrs) {
-    console.log('[WEBHOOK] Missing userId or attrs, skipping');
     return NextResponse.json({ received: true });
   }
 
@@ -62,8 +58,6 @@ export async function POST(req: NextRequest) {
         const plan = customData?.plan || 'PRO';
         const orderId = String(payload.data.id);
         const customerId = String(attrs.customer_id);
-
-        console.log('[WEBHOOK] order_created — plan:', plan, 'orderId:', orderId);
 
         await prisma.user.update({
           where: { id: userId },
