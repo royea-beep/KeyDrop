@@ -7,7 +7,7 @@ import crypto from 'crypto';
 
 /**
  * LemonSqueezy webhook handler.
- * Events: subscription_created, subscription_updated, subscription_cancelled, subscription_expired
+ * Events: order_created, subscription_created, subscription_updated, subscription_cancelled, subscription_expired
  * Docs: https://docs.lemonsqueezy.com/help/webhooks
  */
 export async function POST(req: NextRequest) {
@@ -57,6 +57,31 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (eventName) {
+      case 'order_created': {
+        // One-time purchase: activate plan based on product/variant
+        const plan = customData?.plan || 'PRO';
+        const orderId = String(payload.data.id);
+        const customerId = String(attrs.customer_id);
+
+        console.log('[WEBHOOK] order_created — plan:', plan, 'orderId:', orderId);
+
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            plan,
+            stripeSubscriptionId: orderId,
+            stripeCustomerId: customerId,
+            subscriptionStatus: 'ACTIVE',
+            currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+          },
+        });
+
+        await prisma.auditLog.create({
+          data: { userId, action: 'order_created', metadata: JSON.stringify({ plan, orderId }) },
+        });
+        break;
+      }
+
       case 'subscription_created': {
         const plan = customData?.plan || 'PRO';
         await prisma.user.update({
