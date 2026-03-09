@@ -1,3 +1,6 @@
+/**
+ * URL path is /api/stripe/webhook for backward compatibility; handles LemonSqueezy only.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import crypto from 'crypto';
@@ -23,7 +26,12 @@ export async function POST(req: NextRequest) {
   }
 
   const hmac = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-  if (hmac !== sig) {
+  const sigBuf = Buffer.from(sig, 'utf8');
+  const hmacBuf = Buffer.from(hmac, 'utf8');
+  if (sigBuf.length !== hmacBuf.length) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
+  if (!crypto.timingSafeEqual(sigBuf, hmacBuf)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
