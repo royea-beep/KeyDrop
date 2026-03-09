@@ -1,5 +1,5 @@
 /**
- * Payment provider for 1-2Clicks.
+ * Payment provider for KeyDrop.
  * Uses LemonSqueezy (works from Israel, acts as Merchant of Record).
  *
  * Setup: https://app.lemonsqueezy.com

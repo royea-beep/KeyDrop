@@ -16,7 +16,7 @@ model User {
   logoUrl      String?  @map("logo_url")
   language     String   @default("en")
 
-  // Stripe billing
+  // LemonSqueezy billing (field names kept for migration compat)
   plan                String   @default("FREE")
   stripeCustomerId    String?  @unique @map("stripe_customer_id")
   stripeSubscriptionId String? @map("stripe_subscription_id")
@@ -141,4 +141,17 @@ model AuditLog {
   @@index([requestId])
   @@index([userId])
   @@map("audit_logs")
+}
+
+// Client analytics events (FlushQueue batch)
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String
+  payload   String?
+  timestamp DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([type])
+  @@index([timestamp])
+  @@map("analytics_events")
 }

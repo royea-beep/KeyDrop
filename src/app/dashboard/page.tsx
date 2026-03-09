@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@royea/shared-utils/auth-context';
 import { Copy, Check, ExternalLink, Trash2, Eye, Clock, ChevronRight, Inbox, Plus, Search, Ban } from 'lucide-react';
 import { toast } from 'sonner';
 

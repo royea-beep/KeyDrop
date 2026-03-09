@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createCheckoutUrl, PLANS, type PlanKey } from '@/lib/payments';
 import { prisma } from '@/lib/db';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 
-export const POST = withAuth(async (req: NextRequest, userId: string) => {
+export const POST = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId: string) => {
   try {
     const { plan } = await req.json() as { plan: string };
 
@@ -31,4 +31,4 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     console.error('LemonSqueezy checkout error:', err);
     return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
   }
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<Record<string, never>> }) => Promise<Response>;

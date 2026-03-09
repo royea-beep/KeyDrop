@@ -1,7 +1,11 @@
 'use client';
 
-import { AuthProvider } from '@/lib/auth-context';
+import { AuthProvider } from '@royea/shared-utils/auth-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <AuthProvider storageKey="12clicks_auth" refreshEndpoint="/api/auth/refresh">
+      {children as never}
+    </AuthProvider>
+  );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@royea/shared-utils/auth-context';
 import { Shield, LogOut, Plus, LayoutDashboard, CreditCard } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-6">
             <a href="/dashboard" className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-blue-600" />
-              <span className="font-bold text-gray-900">1-2Clicks</span>
+              <span className="font-bold text-gray-900">KeyDrop</span>
             </a>
             <nav className="hidden sm:flex items-center gap-1">
               <a href="/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { decrypt } from '@/lib/crypto';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 import type { CredentialField, OAuthConnection } from '@/generated/prisma/client';
 
 // GET /api/requests/[id]/credentials — decrypt and return credentials
-export const GET = withAuth(async (req: NextRequest, userId: string) => {
+export const GET = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId: string) => {
   const segments = req.nextUrl.pathname.split('/');
   const id = segments[segments.indexOf('requests') + 1];
 
@@ -75,4 +75,4 @@ export const GET = withAuth(async (req: NextRequest, userId: string) => {
   });
 
   return NextResponse.json({ fields: decryptedFields, oauth: decryptedOAuth });
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;

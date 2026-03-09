@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KeyDrop
 
-## Getting Started
+**Stop getting API keys over WhatsApp.**
 
-First, run the development server:
+KeyDrop lets you collect API keys, passwords, and credentials from clients through encrypted, one-time links. No more insecure WhatsApp messages, emails, or Slack DMs.
+
+## How It Works
+
+1. **Create a request** — Pick from 30+ templates (Stripe, AWS, Firebase, Google, etc.) or build a custom form
+2. **Share the link** — Send a one-time encrypted link to your client
+3. **Receive securely** — Credentials arrive in your dashboard, encrypted with AES-256-GCM
+
+## Features
+
+- **AES-256-GCM encryption** — Credentials are encrypted at rest, not just in transit
+- **One-time links** — Links expire after use (configurable expiry + view limits)
+- **30+ templates** — Pre-built forms for popular services
+- **Audit trail** — Every action is logged with IP and timestamp
+- **Usage-based billing** — Free tier (5 req/mo), Pro ($19/mo), Team ($49/mo)
+
+## Tech Stack
+
+- **Next.js 16** / React 19
+- **Prisma** + SQLite (dev) / Postgres (production)
+- **LemonSqueezy** for billing
+- **TypeScript** throughout
+
+## Local Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Fill in your values (see .env.example for documentation)
+
+# Set up database
+npx prisma migrate dev
+
+# Run dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example` for the full list. Key variables:
 
-## Learn More
+- `DATABASE_URL` — SQLite for dev, Postgres for production
+- `ENCRYPTION_MASTER_KEY` — AES-256 key for credential encryption
+- `JWT_SECRET` / `JWT_REFRESH_SECRET` — Auth tokens
+- `LEMONSQUEEZY_*` — Billing provider configuration
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploy to Railway or any Node.js host with Postgres:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Provision a Postgres database (Neon, Supabase, Railway)
+2. Set all env vars from `.env.example`
+3. Run `npx prisma migrate deploy`
+4. Deploy
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary. All rights reserved.

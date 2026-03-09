@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@royea/shared-utils/auth-context';
 import { BUILT_IN_TEMPLATES, type ServiceTemplate } from '@/lib/templates';
 import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, Copy, Check, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';

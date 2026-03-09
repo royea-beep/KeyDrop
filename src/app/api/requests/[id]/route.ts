@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 
 // GET /api/requests/[id] — get request detail
-export const GET = withAuth(async (_req: NextRequest, userId: string) => {
+export const GET = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userId: string) => {
   const id = _req.nextUrl.pathname.split('/').pop()!;
 
   const request = await prisma.credentialRequest.findFirst({
@@ -24,10 +24,10 @@ export const GET = withAuth(async (_req: NextRequest, userId: string) => {
     fields: request.fields.map((f) => ({ ...f, hasValue: !!f.encryptedValue, encryptedValue: undefined })),
     link: `${process.env.NEXT_PUBLIC_APP_URL || ''}/s/${request.token}`,
   });
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 
 // DELETE /api/requests/[id] — delete request and all encrypted data
-export const DELETE = withAuth(async (_req: NextRequest, userId: string) => {
+export const DELETE = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userId: string) => {
   const id = _req.nextUrl.pathname.split('/').pop()!;
 
   const request = await prisma.credentialRequest.findFirst({ where: { id, userId } });
@@ -42,4 +42,4 @@ export const DELETE = withAuth(async (_req: NextRequest, userId: string) => {
   });
 
   return NextResponse.json({ success: true });
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 
 // POST /api/requests/[id]/revoke — manually expire a link
-export const POST = withAuth(async (req: NextRequest, userId: string) => {
+export const POST = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId: string) => {
   const segments = req.nextUrl.pathname.split('/');
   const id = segments[segments.indexOf('requests') + 1];
 
@@ -26,4 +26,4 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
   });
 
   return NextResponse.json({ success: true });
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;

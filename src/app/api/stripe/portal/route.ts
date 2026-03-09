@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 
 /**
  * LemonSqueezy customer portal redirect.
  * Uses the customer portal URL from LemonSqueezy (no API call needed).
  */
-export const POST = withAuth(async (_req: NextRequest, userId: string) => {
+export const POST = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userId: string) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user?.stripeCustomerId) {
@@ -22,4 +22,4 @@ export const POST = withAuth(async (_req: NextRequest, userId: string) => {
     console.error('Portal error:', err);
     return NextResponse.json({ error: 'Failed to create portal session' }, { status: 500 });
   }
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<Record<string, never>> }) => Promise<Response>;

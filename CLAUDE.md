@@ -1,4 +1,4 @@
-# 1-2Clicks — Secure Credential Collector
+# KeyDrop — Secure Credential Collector
 
 ## Credits
 - Roy (Creator & Product Visionary)
@@ -8,7 +8,7 @@
 A web app where freelance developers collect API keys from clients securely.
 Developer creates a request, sends a link via WhatsApp/SMS, client submits credentials through a clean mobile-friendly form. Everything encrypted (AES-256-GCM).
 
-The name says it all — client gets a link, 1-2 clicks, done.
+Client gets a link, fills in credentials, done.
 
 ## Tech Stack
 - Next.js 14+ (App Router)
@@ -22,7 +22,7 @@ The name says it all — client gets a link, 1-2 clicks, done.
 
 ## Architecture
 ```
-1-2Clicks/
+KeyDrop/
 ├── prisma/schema.prisma          # DB schema (SQLite for dev)
 ├── prisma.config.ts              # Prisma 7 config
 ├── src/
@@ -87,4 +87,4 @@ Full E2E working:
 - OAuth provider flows (Facebook, Google)
 - AI-powered guide generation for unknown services
 - Deploy to Vercel + Neon (switch back to PostgreSQL)
-- Rename folder from KeyDrop to 1-2Clicks
+- Deploy to production

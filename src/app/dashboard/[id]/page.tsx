@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@royea/shared-utils/auth-context';
 import { ArrowLeft, Copy, Check, Eye, EyeOff, Download, Shield, Clock, Loader2, Ban, Trash2, ClipboardList } from 'lucide-react';
 
 interface DecryptedField {

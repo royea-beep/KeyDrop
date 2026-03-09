@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { generateToken } from '@/lib/crypto';
 import { createRequestSchema } from '@/lib/validation';
-import { withAuth } from '@/lib/auth-guard';
+import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
 import { AUTO_PURGE_DAYS } from '@/lib/constants';
 import { getPlanLimits } from '@/lib/payments';
 
@@ -24,7 +24,7 @@ async function maybeAutoPurge() {
 }
 
 // GET /api/requests — list all requests for authenticated user
-export const GET = withAuth(async (_req: NextRequest, userId: string) => {
+export const GET = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userId: string) => {
   // Fire-and-forget auto-purge (non-blocking)
   maybeAutoPurge();
   const requests = await prisma.credentialRequest.findMany({
@@ -43,10 +43,10 @@ export const GET = withAuth(async (_req: NextRequest, userId: string) => {
   }));
 
   return NextResponse.json(mapped);
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<Record<string, never>> }) => Promise<Response>;
 
 // POST /api/requests — create a new credential request
-export const POST = withAuth(async (req: NextRequest, userId: string) => {
+export const POST = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId: string) => {
   try {
     const body = await req.json();
     const data = createRequestSchema.parse(body);
@@ -136,4 +136,4 @@ export const POST = withAuth(async (req: NextRequest, userId: string) => {
     console.error('Create request error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-});
+}) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<Record<string, never>> }) => Promise<Response>;
