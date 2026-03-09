@@ -5,6 +5,7 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/api/auth/',
   '/api/validate/',
   '/api/submit/',
+  '/api/stripe/webhook',
 ];
 
 function isPublicRoute(pathname: string): boolean {
