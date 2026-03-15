@@ -5,6 +5,9 @@ const PUBLIC_ROUTE_PREFIXES = [
   '/api/auth/',
   '/api/validate/',
   '/api/submit/',
+  '/api/billing/plans',
+  '/api/webhooks/lemonsqueezy',
+  '/api/webhooks/payplus',
   '/api/stripe/webhook',
 ];
 
