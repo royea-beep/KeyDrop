@@ -18,6 +18,7 @@ const PLANS = [
     key: 'FREE',
     name: 'Free',
     price: 0,
+    currency: '',
     icon: Shield,
     features: ['5 requests/month', '5 fields per request', 'AES-256 encryption', 'One-time links'],
   },
@@ -25,6 +26,7 @@ const PLANS = [
     key: 'PRO',
     name: 'Pro',
     price: 19,
+    currency: '$',
     icon: Zap,
     popular: true,
     features: ['100 requests/month', '20 fields per request', 'All service templates', 'Priority support', 'Custom branding'],
@@ -33,6 +35,7 @@ const PLANS = [
     key: 'TEAM',
     name: 'Team',
     price: 49,
+    currency: '$',
     icon: Crown,
     features: ['Unlimited requests', '20 fields per request', 'All Pro features', 'Priority support', 'Custom branding'],
   },
@@ -64,7 +67,7 @@ export default function BillingPage() {
   const handleCheckout = async (plan: string) => {
     setCheckoutLoading(plan);
     try {
-      const res = await authFetch('/api/stripe/checkout', {
+      const res = await authFetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
@@ -81,18 +84,9 @@ export default function BillingPage() {
     setCheckoutLoading(null);
   };
 
-  const handlePortal = async () => {
-    try {
-      const res = await authFetch('/api/stripe/portal', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error('No billing portal available');
-      }
-    } catch {
-      toast.error('Failed to open billing portal');
-    }
+  const handlePortal = () => {
+    // LemonSqueezy customer portal — opens in new tab
+    window.open('https://ftable.lemonsqueezy.com/billing', '_blank');
   };
 
   if (authLoading || loading) {
@@ -179,7 +173,7 @@ export default function BillingPage() {
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-3xl font-bold text-gray-900">${plan.price}</span>
+                  <span className="text-3xl font-bold text-gray-900">{plan.currency}{plan.price}</span>
                   {plan.price > 0 && <span className="text-gray-500">/mo</span>}
                 </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { withAuth, type AuthRouteHandler } from '@royea/shared-utils/auth-guard';
+import { getPlanLimits } from '@/lib/payments';
 
 export const GET = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userId: string) => {
   const user = await prisma.user.findUnique({
@@ -18,5 +19,7 @@ export const GET = withAuth((async (_req: Parameters<AuthRouteHandler>[0], userI
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  return NextResponse.json(user);
+  const limits = getPlanLimits(user.plan);
+
+  return NextResponse.json({ ...user, limits });
 }) as unknown as AuthRouteHandler) as unknown as (req: NextRequest, ctx: { params: Promise<Record<string, never>> }) => Promise<Response>;

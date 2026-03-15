@@ -1,12 +1,7 @@
 /**
  * Payment provider for KeyDrop.
  * Uses LemonSqueezy (works from Israel, acts as Merchant of Record).
- *
- * Setup: https://app.lemonsqueezy.com
- * 1. Create account
- * 2. Create Store
- * 3. Create 2 Products (Pro $19/mo, Team $49/mo) with variants
- * 4. Copy API key + variant IDs into .env
+ * Store: ftable (ID 309460)
  */
 
 import {
@@ -14,7 +9,6 @@ import {
   createCheckout,
   getSubscription,
   cancelSubscription,
-  type Checkout,
 } from '@lemonsqueezy/lemonsqueezy.js';
 
 function initLS() {
@@ -50,6 +44,15 @@ export type PlanKey = keyof typeof PLANS;
 
 export function getPlanLimits(plan: string) {
   return PLANS[plan as PlanKey] || PLANS.FREE;
+}
+
+/** Public plan display for billing UI (no variant IDs exposed). */
+export function getPlanDisplay(): { key: string; name: string; price: number; currency: string; features: string[]; popular?: boolean }[] {
+  return [
+    { key: 'FREE', name: 'Free', price: 0, currency: '', features: ['5 requests/month', '5 fields per request', 'AES-256 encryption', 'One-time links'] },
+    { key: 'PRO', name: 'Pro', price: 19, currency: '$', popular: true, features: ['100 requests/month', '20 fields per request', 'All service templates', 'Priority support', 'Custom branding'] },
+    { key: 'TEAM', name: 'Team', price: 49, currency: '$', features: ['Unlimited requests', '20 fields per request', 'All Pro features', 'Priority support', 'Custom branding'] },
+  ];
 }
 
 /** Create a LemonSqueezy checkout URL for a plan */
