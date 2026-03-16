@@ -20,7 +20,7 @@ export const createRequestSchema = z.object({
   projectName: z.string().max(100).optional().or(z.literal('')),
   note: z.string().max(1000).optional().or(z.literal('')),
   language: z.enum(['en', 'he']).default('en'),
-  expiresInHours: z.number().min(1).max(168).default(48),
+  expiresInHours: z.number().min(0).max(720).default(48), // 0 = never expires, max 30 days
   templateSlug: z.string().optional(),
   fields: z.array(z.object({
     label: z.string().min(1).max(200),

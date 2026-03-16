@@ -76,7 +76,10 @@ export const POST = withAuth((async (req: Parameters<AuthRouteHandler>[0], userI
     }
 
     const token = generateToken();
-    const expiresAt = new Date(Date.now() + data.expiresInHours * 60 * 60 * 1000);
+    // expiresInHours === 0 means "never" — set to 10 years out
+    const expiresAt = data.expiresInHours === 0
+      ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000)
+      : new Date(Date.now() + data.expiresInHours * 60 * 60 * 1000);
 
     const request = await prisma.credentialRequest.create({
       data: {

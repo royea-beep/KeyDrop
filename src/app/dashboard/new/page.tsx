@@ -294,6 +294,8 @@ export default function NewRequestPage() {
                 <option value={48}>48 hours</option>
                 <option value={72}>3 days</option>
                 <option value={168}>7 days</option>
+                <option value={720}>30 days</option>
+                <option value={0}>Never</option>
               </select>
             </div>
           </div>
