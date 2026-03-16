@@ -25,14 +25,6 @@ export const GET = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId
     return NextResponse.json({ error: 'Credentials not yet submitted' }, { status: 400 });
   }
 
-  // Enforce maxViews limit
-  if (request.viewCount >= request.maxViews) {
-    return NextResponse.json(
-      { error: 'Maximum view count exceeded. These credentials are no longer accessible.' },
-      { status: 403 }
-    );
-  }
-
   // Decrypt manual fields
   const decryptedFields = request.fields
     .filter((f: CredentialField) => f.encryptedValue && f.iv && f.authTag)
@@ -55,13 +47,12 @@ export const GET = withAuth((async (req: Parameters<AuthRouteHandler>[0], userId
       tokenType: o.tokenType,
     }));
 
-  // Mark as retrieved and increment view count
+  // Mark as retrieved
   await prisma.credentialRequest.update({
     where: { id },
     data: {
       status: 'RETRIEVED',
       retrievedAt: new Date(),
-      viewCount: { increment: 1 },
     },
   });
 
