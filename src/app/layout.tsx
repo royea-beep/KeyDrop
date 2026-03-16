@@ -12,8 +12,20 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "KeyDrop — Secure Credential Collector",
-  description: "Collect API keys from clients securely",
+  title: "KeyDrop — Secure Credential Sharing",
+  description: "Send and receive API keys and credentials through encrypted one-time links",
+  openGraph: {
+    title: "KeyDrop — Secure Credential Sharing",
+    description: "Send and receive API keys and credentials through encrypted one-time links",
+    url: "https://1-2clicks.vercel.app",
+    siteName: "KeyDrop",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KeyDrop — Secure Credential Sharing",
+    description: "Send and receive API keys and credentials through encrypted one-time links",
+  },
 };
 
 export default function RootLayout({
