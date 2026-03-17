@@ -28,5 +28,11 @@ Encrypted one-time credential sharing. Users create a secure link containing an 
 ## Critical Bug Fixed
 - maxViews was blocking retrieval — resolved
 
+## SESSION LOG — March 17 2026
+
+### What was built today:
+1. **Admin Dashboard** — Admin panel at /admin?key=keydrop-admin-2026 with usage stats and management
+2. **SEO Structured Data** — JSON-LD schema markup for search engine visibility
+
 ## Pending
 - Create dedicated LemonSqueezy products in dashboard (currently using ftable placeholder variants)
