@@ -36,6 +36,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="canonical" href="https://1-2clicks.vercel.app" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'SoftwareApplication',
+          name: 'KeyDrop',
+          url: 'https://1-2clicks.vercel.app',
+          description: 'Send and receive API keys through encrypted one-time links',
+          applicationCategory: 'DeveloperApplication',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        }) }} />
+      </head>
       <body className={`${geist.variable} font-sans antialiased bg-gray-50 text-gray-900 min-h-screen`}>
         <Toaster position="top-right" richColors closeButton />
         <BugReporterInit />
