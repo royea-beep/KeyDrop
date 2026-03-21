@@ -1,12 +1,11 @@
 /**
  * Payment provider for KeyDrop.
- * Uses LemonSqueezy (works from Israel, acts as Merchant of Record).
+ * Uses LemonSqueezy via direct REST API (aligned with @royea/shared-utils/billing-provider pattern).
  * Store: ftable (ID 309460)
  */
 
 import {
   lemonSqueezySetup,
-  createCheckout,
   getSubscription,
   cancelSubscription,
 } from '@lemonsqueezy/lemonsqueezy.js';
@@ -55,7 +54,7 @@ export function getPlanDisplay(): { key: string; name: string; price: number; cu
   ];
 }
 
-/** Create a LemonSqueezy checkout URL for a plan */
+/** Create a LemonSqueezy checkout URL — direct REST API (shared-utils pattern) */
 export async function createCheckoutUrl(opts: {
   plan: 'PRO' | 'TEAM';
   userId: string;
@@ -63,35 +62,47 @@ export async function createCheckoutUrl(opts: {
   name: string;
   successUrl: string;
 }): Promise<string> {
-  initLS();
-
   const planConfig = PLANS[opts.plan];
   if (!('variantId' in planConfig) || !planConfig.variantId) {
     throw new Error(`No variant ID configured for plan ${opts.plan}`);
   }
 
+  const apiKey = process.env.LEMONSQUEEZY_API_KEY;
+  if (!apiKey) throw new Error('LEMONSQUEEZY_API_KEY not set');
   const storeId = process.env.LEMONSQUEEZY_STORE_ID;
   if (!storeId) throw new Error('LEMONSQUEEZY_STORE_ID not set');
 
-  const { data, error } = await createCheckout(storeId, planConfig.variantId, {
-    checkoutData: {
-      email: opts.email,
-      name: opts.name,
-      custom: {
-        user_id: opts.userId,
-        plan: opts.plan,
+  const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/vnd.api+json',
+      'Accept': 'application/vnd.api+json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      data: {
+        type: 'checkouts',
+        attributes: {
+          checkout_data: {
+            email: opts.email,
+            name: opts.name,
+            custom: { user_id: opts.userId, plan: opts.plan },
+          },
+          product_options: { redirect_url: opts.successUrl },
+        },
+        relationships: {
+          store: { data: { type: 'stores', id: storeId } },
+          variant: { data: { type: 'variants', id: planConfig.variantId } },
+        },
       },
-    },
-    productOptions: {
-      redirectUrl: opts.successUrl,
-    },
+    }),
   });
 
-  if (error || !data) {
-    throw new Error(error?.message || 'Failed to create checkout');
-  }
-
-  return (data as { data: { attributes: { url: string } } }).data.attributes.url;
+  if (!response.ok) throw new Error(`LemonSqueezy checkout error: ${response.statusText}`);
+  const data = await response.json() as { data?: { attributes?: { url: string } } };
+  const url = data.data?.attributes?.url;
+  if (!url) throw new Error('Failed to create checkout — no URL returned');
+  return url;
 }
 
 /** Get subscription details */
