@@ -1,4 +1,7 @@
 User-agent: *
+Disallow: /api/
+Disallow: /admin
+Disallow: /_next/data/
 Allow: /
 
 Sitemap: https://1-2clicks.vercel.app/sitemap.xml
