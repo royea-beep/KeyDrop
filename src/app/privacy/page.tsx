@@ -20,7 +20,7 @@ export default function PrivacyPage() {
         <h2>2. How We Use Your Data</h2>
         <ul>
           <li>To provide and maintain the KeyDrop service</li>
-          <li>To process billing through LemonSqueezy</li>
+          <li>To process billing through Payplus</li>
           <li>To send service-related communications</li>
           <li>To maintain audit logs for security</li>
         </ul>
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         <h2>5. Third Parties</h2>
         <p>We share data only with:</p>
         <ul>
-          <li><strong>LemonSqueezy:</strong> payment processing (email, plan info)</li>
+          <li><strong>Payplus:</strong> payment processing (email, plan info)</li>
           <li><strong>Hosting provider:</strong> encrypted data at rest</li>
         </ul>
         <p>We do not sell your data. We do not use your data for advertising.</p>

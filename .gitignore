@@ -48,3 +48,4 @@ src/generated/
 *.db-journal
 
 .vercel
+CLAUDE.md

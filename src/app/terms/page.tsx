@@ -22,7 +22,7 @@ export default function TermsPage() {
         <p>Credentials submitted through KeyDrop are encrypted with AES-256-GCM before storage. One-time links expire after use or after the configured expiry period. We do not access, read, or share your stored credentials.</p>
 
         <h2>5. Billing</h2>
-        <p>Paid plans are billed monthly through our payment processor (LemonSqueezy). You may cancel at any time through the billing portal. Refunds are handled on a case-by-case basis.</p>
+        <p>Paid plans are billed monthly through our payment processor (Payplus). You may cancel at any time through the billing portal. Refunds are handled on a case-by-case basis.</p>
 
         <h2>6. Limitation of Liability</h2>
         <p>KeyDrop is provided &quot;as is&quot; without warranty. We are not liable for any indirect, incidental, or consequential damages arising from your use of the service.</p>
